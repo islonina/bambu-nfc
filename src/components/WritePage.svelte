@@ -49,7 +49,10 @@
     if (p.current <= BAMBU_SECTOR_COUNT) {
       return t('write.progress.format').replace('{0}', String(p.current))
     }
-    return t('write.progress.write').replace('{0}', String(p.current - BAMBU_SECTOR_COUNT))
+    if (p.current <= BAMBU_SECTOR_COUNT * 2) {
+      return t('write.progress.write').replace('{0}', String(p.current - BAMBU_SECTOR_COUNT))
+    }
+    return t('write.progress.seal')
   })
 
   const writeDone = $derived(
@@ -100,15 +103,19 @@
     writeStore.writeError = null
 
     try {
-      const ok = await writeTag(
+      const result = await writeTag(
         bluetooth.ultra,
         writeStore.selectedDump,
         (current, total, message) => {
           writeStore.writeProgress = { current, total, message }
         }
       )
-      if (ok) {
-        writeStore.writeProgress = { current: WRITE_PROGRESS_TOTAL, total: WRITE_PROGRESS_TOTAL, message: t('write.done') }
+      if (result) {
+        writeStore.writeProgress = {
+          current: WRITE_PROGRESS_TOTAL,
+          total: WRITE_PROGRESS_TOTAL,
+          message: result.sealed ? t('write.done_ufuid') : t('write.done'),
+        }
       }
     } catch (e: any) {
       writeStore.writeError = formatNfcError(e.message)

@@ -3,12 +3,18 @@ import type { ChameleonUltra } from 'chameleon-ultra.js'
 import { parseTagDump, EXPECTED_DUMP_SIZE, type ParsedTag } from './nfc-parser'
 
 const BAMBU_SECTOR_COUNT = 16
-/** Format (16 sectors) + write (16 sectors) */
-export const WRITE_PROGRESS_TOTAL = BAMBU_SECTOR_COUNT * 2
+/** Format (16 sectors) + write (16 sectors) + best-effort UFUID seal */
+export const WRITE_PROGRESS_TOTAL = BAMBU_SECTOR_COUNT * 2 + 1
 export { BAMBU_SECTOR_COUNT }
 const FF_KEY = new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
 const DEFAULT_ACCESS = new Uint8Array([0xFF, 0x07, 0x80, 0x69])
 const ZERO_BLOCK = new Uint8Array(16)
+const GEN1A_ACK = 0x0A
+/** UFUID seal config: magic wakeup off (`8500…`), SAK 08. Irreversible. */
+const UFUID_SEAL_CONFIG = new Uint8Array([
+  0x85, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08,
+])
 
 /**
  * Blocks required to parse Bambu tag data (see nfc-parser.ts).
@@ -272,6 +278,54 @@ async function writeDumpWithFf(
   return true
 }
 
+/**
+ * Best-effort UFUID seal. Always run after a successful dump write.
+ *
+ * Unsealed UFUID is Gen1a (printer-detectable). Sealing writes config
+ * `8500…08` so the backdoor dies and the tag behaves as a normal M1.
+ * UID / CUID / FUID / already-sealed cards reject the sequence — ignore.
+ * Never writes block 0, so a virgin FUID's one-shot UID write is untouched.
+ */
+async function trySealUfuid(ultra: ChameleonUltra): Promise<boolean> {
+  try {
+    await ultra.mf1Halt()
+    const wup1 = await ultra.cmdHf14aRaw({
+      data: SDKBuffer.from(new Uint8Array([0x40])),
+      dataBitLength: 7,
+      keepRfField: true,
+      timeout: 200,
+    })
+    if (wup1[0] !== GEN1A_ACK) return false
+
+    const wup2 = await ultra.cmdHf14aRaw({
+      data: SDKBuffer.from(new Uint8Array([0x43])),
+      keepRfField: true,
+      timeout: 200,
+    })
+    if (wup2[0] !== GEN1A_ACK) return false
+
+    const cfgCmd = await ultra.cmdHf14aRaw({
+      appendCrc: true,
+      data: SDKBuffer.from(new Uint8Array([0xE1, 0x00])),
+      keepRfField: true,
+      timeout: 200,
+    })
+    if (cfgCmd[0] !== GEN1A_ACK) return false
+
+    const cfgWrite = await ultra.cmdHf14aRaw({
+      appendCrc: true,
+      data: SDKBuffer.from(UFUID_SEAL_CONFIG),
+      keepRfField: true,
+      timeout: 500,
+    })
+    return cfgWrite[0] === GEN1A_ACK
+  } catch {
+    return false
+  } finally {
+    try { await ultra.mf1Halt() } catch { /* field already down */ }
+  }
+}
+
 export interface ReadResult {
   parsed: ParsedTag
   uidHex: string
@@ -326,15 +380,19 @@ export async function readTag(ultra: ChameleonUltra): Promise<ReadResult | null>
 
 export type ProgressCallback = (current: number, total: number, message?: string) => void
 
+export interface WriteResult {
+  sealed: boolean
+}
+
 /** Mirrors BambuNfcTool FormatThenWriteDump */
 export async function writeTag(
   ultra: ChameleonUltra,
   dump: { dumpBase64: string },
   onProgress: ProgressCallback
-): Promise<boolean> {
+): Promise<WriteResult | null> {
   await ultra.cmdChangeDeviceMode(DeviceMode.READER)
   const cards = await ultra.cmdHf14aScan()
-  if (!cards || !cards.length) return false
+  if (!cards || !cards.length) return null
 
   const sectorKeys = await deriveKeys(new Uint8Array(cards[0].uid))
   const dd = base64ToSdkBuffer(dump.dumpBase64)
@@ -342,5 +400,8 @@ export async function writeTag(
   onProgress(0, WRITE_PROGRESS_TOTAL)
   await sleep(POST_KEY_DERIVATION_DELAY_MS)
   await formatToDefaultFf(ultra, sectorKeys, onProgress)
-  return writeDumpWithFf(ultra, dd, onProgress)
+  await writeDumpWithFf(ultra, dd, onProgress)
+  onProgress(WRITE_PROGRESS_TOTAL, WRITE_PROGRESS_TOTAL)
+  const sealed = await trySealUfuid(ultra)
+  return { sealed }
 }

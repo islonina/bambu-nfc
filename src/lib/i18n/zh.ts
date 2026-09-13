@@ -43,8 +43,10 @@ const zh: Record<string, string> = {
   'write.button': '写入标签',
   'write.empty_text': '请在上方选择耗材',
   'write.done': '完成！',
+  'write.done_ufuid': 'UFUID 卡封卡成功',
   'write.progress.format': '准备扇区 {0}/16',
   'write.progress.write': '写入扇区 {0}/16',
+  'write.progress.seal': '封卡',
   'write.sector_failed': '写入扇区 {0} 失败',
 
   // nfc write errors (codes thrown by src/lib/nfc.ts)

@@ -43,8 +43,10 @@ const en: Record<string, string> = {
   'write.button': 'Write to Tag',
   'write.empty_text': 'Select a filament above',
   'write.done': 'Done!',
+  'write.done_ufuid': 'UFUID card sealed',
   'write.progress.format': 'Preparing sector {0}/16',
   'write.progress.write': 'Writing sector {0}/16',
+  'write.progress.seal': 'Sealing',
   'write.sector_failed': 'Write sector {0} failed',
 
   // nfc write errors (codes thrown by src/lib/nfc.ts)
