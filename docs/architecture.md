@@ -41,6 +41,15 @@ z-index 100  .tabbar          底部导航栏（fixed）
 4. 进度 32 步：格式化 16 扇区 + 写入 16 扇区
 5. Scan 页「修复标签」：按物理 UID 查库，跳转写入页并预选 dump
 
+## 已写卡记录（written.svelte.ts）
+
+以「Category / Material / Color」为键记住某个颜色是否已写过卡，避免重复写卡浪费 FUID 卡。数据为字符串数组，localStorage key `bambu-nfc-written-colors`，跨会话保留：
+
+- **自动标记**：写卡成功（`writeTag` 返回）后 `WritePage` 自动调用 `writtenStore.mark()`
+- **读取页手动标记**：Scan 页读卡按 UID 命中库中 dump 时，操作栏可一键标记 / 取消该颜色
+- **写入页手动标记**：Write 页操作栏切换按钮标记 / 取消当前选中颜色
+- **UI 指示**：Write 页颜色网格中已写卡的颜色色块右上角显示绿色圆点角标（绿色复用写入成功的语义色）
+
 ## 关键全局变量
 
 | 变量 | 类型 | 说明 |

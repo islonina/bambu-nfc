@@ -6,3 +6,4 @@ dist
 !public/icon*.png
 .claude
 .impeccable
+.zcode

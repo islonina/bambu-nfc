@@ -49,6 +49,11 @@ const zh: Record<string, string> = {
   'write.progress.seal': '封卡',
   'write.sector_failed': '写入扇区 {0} 失败',
 
+  // written-color marks (shared by scan & write pages)
+  'mark.mark_written': '标记已写卡',
+  'mark.written': '已写卡',
+  'mark.unmark_written': '取消已写卡标记',
+
   // nfc write errors (codes thrown by src/lib/nfc.ts)
   'nfc.format_sector0_auth': '格式化 sector 0 认证失败',
   'nfc.format_trailer_reset': '格式化 sector {0} trailer 重置失败',

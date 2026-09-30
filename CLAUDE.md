@@ -37,6 +37,7 @@ src/
     bluetooth.svelte.ts       # 蓝牙连接状态
     tag-db.svelte.ts          # 标签数据库（直接 import JSON 打包进 JS）
     write.svelte.ts           # 写入页级联选择状态
+    written.svelte.ts         # 已写卡颜色记录（localStorage 持久化）
   components/                 # UI 组件
     TagInfoCard.svelte        # Scan 和 Write 共用耗材详情卡片
     UpdatePrompt.svelte       # PWA 更新提示

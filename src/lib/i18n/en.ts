@@ -49,6 +49,11 @@ const en: Record<string, string> = {
   'write.progress.seal': 'Sealing',
   'write.sector_failed': 'Write sector {0} failed',
 
+  // written-color marks (shared by scan & write pages)
+  'mark.mark_written': 'Mark as written',
+  'mark.written': 'Written',
+  'mark.unmark_written': 'Clear written mark',
+
   // nfc write errors (codes thrown by src/lib/nfc.ts)
   'nfc.format_sector0_auth': 'Format sector 0 auth failed',
   'nfc.format_trailer_reset': 'Format sector {0} trailer reset failed',

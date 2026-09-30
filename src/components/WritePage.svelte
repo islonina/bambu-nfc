@@ -2,6 +2,7 @@
   import { bluetooth } from '../stores/bluetooth.svelte'
   import { tagDb, colorLabel } from '../stores/tag-db.svelte'
   import { writeStore } from '../stores/write.svelte'
+  import { writtenStore } from '../stores/written.svelte'
   import { writeTag, WRITE_PROGRESS_TOTAL, BAMBU_SECTOR_COUNT } from '../lib/nfc'
   import { formatNfcError } from '../lib/nfc-errors'
   import { t } from '../lib/i18n'
@@ -17,6 +18,11 @@
 
   const colorEntry = $derived(
     writeStore.colors.find(c => c.name === writeStore.selectedColorKey)
+  )
+
+  const colorMarked = $derived(
+    writeStore.selectedColorKey !== null &&
+    writtenStore.isWritten(writeStore.selectedCategory, writeStore.selectedMaterial, writeStore.selectedColorKey)
   )
 
   // Hue-sorted colors for visual grouping
@@ -96,6 +102,23 @@
     writeStore.setCategory(name)
   }
 
+  function swatchLabel(name: string, nameZh: string | null): string {
+    const base = colorLabel(name, nameZh)
+    return writtenStore.isWritten(writeStore.selectedCategory, writeStore.selectedMaterial, name)
+      ? `${base} · ${t('mark.written')}`
+      : base
+  }
+
+  function toggleWritten(): void {
+    const { selectedCategory, selectedMaterial, selectedColorKey } = writeStore
+    if (!selectedCategory || !selectedMaterial || !selectedColorKey) return
+    if (writtenStore.isWritten(selectedCategory, selectedMaterial, selectedColorKey)) {
+      writtenStore.unmark(selectedCategory, selectedMaterial, selectedColorKey)
+    } else {
+      writtenStore.mark(selectedCategory, selectedMaterial, selectedColorKey)
+    }
+  }
+
   async function doWrite(): Promise<void> {
     if (writeDone) { writeStore.writeProgress = null; return }
     if (!writeStore.selectedDump || !bluetooth.ultra) return
@@ -111,6 +134,13 @@
         }
       )
       if (result) {
+        if (writeStore.selectedCategory && writeStore.selectedMaterial && writeStore.selectedColorKey) {
+          writtenStore.mark(
+            writeStore.selectedCategory,
+            writeStore.selectedMaterial,
+            writeStore.selectedColorKey
+          )
+        }
         writeStore.writeProgress = {
           current: WRITE_PROGRESS_TOTAL,
           total: WRITE_PROGRESS_TOTAL,
@@ -176,10 +206,13 @@
             style={c.secondaryColorCSS
               ? `background:linear-gradient(135deg, ${c.colorCSS} 50%, ${c.secondaryColorCSS} 50%)`
               : `background:${c.colorCSS}`}
-            aria-label={colorLabel(c.name, c.nameZh)}
-            title={colorLabel(c.name, c.nameZh)}
+            aria-label={swatchLabel(c.name, c.nameZh)}
+            title={swatchLabel(c.name, c.nameZh)}
             onclick={() => writeStore.selectColor(c.name)}
           >
+            {#if writtenStore.isWritten(writeStore.selectedCategory, writeStore.selectedMaterial, c.name)}
+              <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green border-2 border-bg z-20" aria-hidden="true"></span>
+            {/if}
             {#if c.name === writeStore.selectedColorKey}
               <div class="w-full h-full flex items-center justify-center">
                 <Check size={18} class="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" stroke="white" stroke-width={3} />
@@ -225,6 +258,19 @@
           {/if}
         </span>
       </button>
+      {#if colorEntry}
+        <button
+          type="button"
+          class="flex items-center justify-center gap-1.5 px-3 py-3 border rounded-[10px] text-xs font-semibold cursor-pointer transition-colors shrink-0 {colorMarked
+            ? 'border-green/30 bg-card text-green hover:border-green/60'
+            : 'border-border bg-card text-dim hover:border-accent hover:text-accent'}"
+          onclick={toggleWritten}
+          title={colorMarked ? t('mark.unmark_written') : t('mark.mark_written')}
+        >
+          <Check size={14} stroke-width={colorMarked ? 3 : 2} />
+          {t(colorMarked ? 'mark.written' : 'mark.mark_written')}
+        </button>
+      {/if}
       {#if (colorEntry?.dumpCount ?? 0) > 1}
         <button
           class="flex items-center justify-center gap-1.5 px-3 py-3 border border-border rounded-[10px] text-xs font-semibold cursor-pointer transition-colors bg-card text-dim hover:border-accent hover:text-accent shrink-0 disabled:opacity-35 disabled:cursor-not-allowed"

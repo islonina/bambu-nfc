@@ -12,6 +12,7 @@ PWA 工具，通过蓝牙连接 [Chameleon Ultra](https://github.com/RfidResearc
 
 - 📖 **读取** — 扫描 NFC 标签，解析耗材信息（类型、颜色、温度、直径等），并在标签库中匹配
 - ✏️ **写入** — 从标签库选择耗材，写入空白 NFC 标签，支持多 dump 随机切换
+- ✅ **写卡记录** — 写卡成功后自动标记该颜色已写卡，读取/写入页也可手动标记或取消，避免重复写卡浪费卡
 - 📱 **PWA** — 安装为桌面应用，离线可用
 - 🔒 **密钥派生** — 自动通过 HKDF-SHA256 从 UID 派生读/写密钥
 
@@ -53,6 +54,7 @@ src/
     bluetooth.svelte.ts     # 蓝牙连接状态
     tag-db.svelte.ts        # 标签数据库加载与查询
     write.svelte.ts         # 写入页级联选择状态
+    written.svelte.ts       # 已写卡颜色记录（localStorage 持久化）
   components/               # UI 组件
 public/
   bambu-tags.json           # 标签数据库（4.5MB，运行时 fetch）

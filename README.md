@@ -12,6 +12,7 @@ A PWA tool for reading and writing MIFARE Classic 1K NFC tags on Bambu Lab 3D pr
 
 - 📖 **Read** — Scan NFC tags, parse filament info (type, color, temperature, diameter, etc.), and match against the tag library
 - ✏️ **Write** — Select filament from the library and write to blank NFC tags, with random dump shuffling
+- ✅ **Written Tracking** — Colors are auto-marked after a successful write, and can be toggled manually from the Scan or Write pages, so you never waste a card on a repeat write
 - 📱 **PWA** — Install as desktop app, works offline
 - 🔒 **Key Derivation** — Automatically derive read/write keys from UID via HKDF-SHA256
 
@@ -53,6 +54,7 @@ src/
     bluetooth.svelte.ts     # Bluetooth connection state
     tag-db.svelte.ts        # Tag database loading & querying
     write.svelte.ts         # Write page cascade selection state
+    written.svelte.ts       # Written-color records (localStorage persisted)
   components/               # UI components
 public/
   bambu-tags.json           # Tag database (4.5MB, runtime fetch)
