@@ -21,9 +21,10 @@ const zh: Record<string, string> = {
 
   // colors page (overview, no bluetooth required)
   'colors.title': '颜色总览',
-  'colors.hint': '点击颜色即可标记 / 取消已写卡；写卡成功后会自动标记',
+  'colors.hint': '点击颜色选中，再点下方按钮标记 / 取消已写卡；写卡成功后会自动标记',
   'colors.written_label': '已写卡',
   'colors.written_count': '已写 {0}/{1}',
+  'colors.clear_selection': '取消选择',
 
   // scan page
   'scan.empty_text': '将 Bambu NFC 标签放在读卡器上<br>然后点击下方按钮',
