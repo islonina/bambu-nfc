@@ -161,3 +161,50 @@ export function sortDumpsNewestFirst(dumps: TagDump[]): TagDump[] {
   sortedDumpsCache.set(dumps, sorted)
   return sorted
 }
+
+function cssHue(css: string): number {
+  const hex = css.startsWith('#') ? css : '#000000'
+  const n = parseInt(hex.slice(1), 16)
+  const r = ((n >> 16) & 255) / 255
+  const g = ((n >> 8) & 255) / 255
+  const b = (n & 255) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  if (max === min) return 0
+  const d = max - min
+  let h = 0
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0))
+  else if (max === g) h = ((b - r) / d + 2)
+  else h = ((r - g) / d + 4)
+  return h * 60
+}
+
+function hueGroup(hue: number, css: string): number {
+  const hex = css.startsWith('#') ? css : '#000000'
+  const n = parseInt(hex.slice(1), 16)
+  const r = (n >> 16) & 255
+  const g = (n >> 8) & 255
+  const b = n & 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  if (max - min < 25) return 6 // neutral/gray
+  if (hue < 30 || hue >= 330) return 0 // reds/pinks
+  if (hue < 70) return 1 // oranges/yellows
+  if (hue < 170) return 2 // greens
+  if (hue < 270) return 3 // blues
+  return 4 // purples
+}
+
+const hueSortedCache = new WeakMap<ColorEntry[], ColorEntry[]>()
+
+/** Swatches grouped by hue family (reds → … → purples, neutrals last). */
+export function sortColorsByHue(colors: ColorEntry[]): ColorEntry[] {
+  const cached = hueSortedCache.get(colors)
+  if (cached) return cached
+  const decorated = colors.map(c => {
+    const hue = cssHue(c.colorCSS)
+    return { entry: c, hue, group: hueGroup(hue, c.colorCSS) }
+  })
+  decorated.sort((a, b) => (a.group !== b.group ? a.group - b.group : a.hue - b.hue))
+  const sorted = decorated.map(d => d.entry)
+  hueSortedCache.set(colors, sorted)
+  return sorted
+}

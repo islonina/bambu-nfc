@@ -3,9 +3,12 @@
   import { t } from '../lib/i18n'
   import { Bluetooth } from '@lucide/svelte'
   import { fade } from 'svelte/transition'
+
+  // 颜色页不需要蓝牙：hidden 为 true 时不显示连接引导
+  let { hidden = false }: { hidden?: boolean } = $props()
 </script>
 
-{#if !bluetooth.isConnected}
+{#if !bluetooth.isConnected && !hidden}
   <div class="fixed inset-0 bg-bg/95 flex flex-col items-center justify-center z-[200] gap-5" transition:fade={{ duration: 300 }}>
     <div class="text-[2.5rem] font-extrabold">Bambu <span class="text-accent">NFC</span></div>
     <div class="text-dim text-sm text-center max-w-[260px]">{t('conn.subtitle')}</div>

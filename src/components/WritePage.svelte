@@ -1,6 +1,6 @@
 <script lang="ts">
   import { bluetooth } from '../stores/bluetooth.svelte'
-  import { tagDb, colorLabel } from '../stores/tag-db.svelte'
+  import { tagDb, colorLabel, sortColorsByHue } from '../stores/tag-db.svelte'
   import { writeStore } from '../stores/write.svelte'
   import { writtenStore } from '../stores/written.svelte'
   import { writeTag, WRITE_PROGRESS_TOTAL, BAMBU_SECTOR_COUNT } from '../lib/nfc'
@@ -26,20 +26,7 @@
   )
 
   // Hue-sorted colors for visual grouping
-  const sortedColors = $derived.by(() => {
-    const colors = writeStore.colors
-    if (!colors.length) return []
-    return [...colors].sort((a, b) => {
-      const hueA = cssHue(a.colorCSS)
-      const hueB = cssHue(b.colorCSS)
-      // Group: reds (0-30), yellows (30-70), greens (70-170), blues (170-270), purples (270-330), pinks (330-360)
-      // Neutrals (very low saturation) go last
-      const groupA = hueGroup(hueA, a.colorCSS)
-      const groupB = hueGroup(hueB, b.colorCSS)
-      if (groupA !== groupB) return groupA - groupB
-      return hueA - hueB
-    })
-  })
+  const sortedColors = $derived(sortColorsByHue(writeStore.colors))
 
   const writePct = $derived(
     writeStore.writeProgress
@@ -65,38 +52,6 @@
     writeStore.writeProgress != null && !writeStore.isWriting &&
     writeStore.writeProgress.current === writeStore.writeProgress.total
   )
-
-  function cssHue(css: string): number {
-    const hex = css.startsWith('#') ? css : '#000000'
-    const n = parseInt(hex.slice(1), 16)
-    const r = ((n >> 16) & 255) / 255
-    const g = ((n >> 8) & 255) / 255
-    const b = (n & 255) / 255
-    const max = Math.max(r, g, b), min = Math.min(r, g, b)
-    if (max === min) return 0
-    const d = max - min
-    let h = 0
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0))
-    else if (max === g) h = ((b - r) / d + 2)
-    else h = ((r - g) / d + 4)
-    return h * 60
-  }
-
-  function hueGroup(hue: number, css: string): number {
-    // Neutrals (grayscale) go last (group 6)
-    const hex = css.startsWith('#') ? css : '#000000'
-    const n = parseInt(hex.slice(1), 16)
-    const r = ((n >> 16) & 255)
-    const g = ((n >> 8) & 255)
-    const b = (n & 255)
-    const max = Math.max(r, g, b), min = Math.min(r, g, b)
-    if (max - min < 25) return 6 // neutral/gray
-    if (hue < 30 || hue >= 330) return 0 // reds/pinks
-    if (hue < 70) return 1 // oranges/yellows
-    if (hue < 170) return 2 // greens
-    if (hue < 270) return 3 // blues
-    return 4 // purples
-  }
 
   function selectCategory(name: string): void {
     writeStore.setCategory(name)

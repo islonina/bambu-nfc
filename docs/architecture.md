@@ -2,17 +2,17 @@
 
 ## 页面层级
 
-单页应用，两个 tab 页面 + 两个全屏覆盖层：
+单页应用，三个 tab 页面 + 连接引导遮罩：
 
 ```
-z-index 300  #loading         初始加载（加载 bambu-tags.json）
-z-index 200  #connectOverlay  蓝牙连接引导
-             #pageScan        Scan 页面（读标签）
-             #pageWrite       Write 页面（写标签）
-z-index 100  .tabbar          底部导航栏（fixed）
+z-index 201  .tabbar          底部导航栏（fixed，位于遮罩之上，未连接也可切换）
+z-index 200  #connectOverlay  蓝牙连接引导（未连接且不在 Colors 页时显示）
+             #pageColors      Colors 页面（颜色总览 + 已写卡标记，免蓝牙）
+             #pageScan        Scan 页面（读标签，需蓝牙）
+             #pageWrite       Write 页面（写标签，需蓝牙）
 ```
 
-页面切换：`switchTab(tab)` 控制 `.page.active` class。
+默认进入 Colors 页（无需蓝牙即可浏览颜色和标记）；切到 Scan/Write 时若未连接弹出连接引导。
 
 ## 启动流程
 
@@ -46,9 +46,10 @@ z-index 100  .tabbar          底部导航栏（fixed）
 以「Category / Material / Color」为键记住某个颜色是否已写过卡，避免重复写卡浪费 FUID 卡。数据为字符串数组，localStorage key `bambu-nfc-written-colors`，跨会话保留：
 
 - **自动标记**：写卡成功（`writeTag` 返回）后 `WritePage` 自动调用 `writtenStore.mark()`
+- **颜色页标记**：Colors 页全量展开所有类别/材料/颜色（免蓝牙），点击色块即切换标记；页面顶部与每个材料行显示已写计数
 - **读取页手动标记**：Scan 页读卡按 UID 命中库中 dump 时，操作栏可一键标记 / 取消该颜色
 - **写入页手动标记**：Write 页操作栏切换按钮标记 / 取消当前选中颜色
-- **UI 指示**：Write 页颜色网格中已写卡的颜色色块右上角显示绿色圆点角标（绿色复用写入成功的语义色）
+- **UI 指示**：Colors 页与 Write 页颜色网格中已写卡的颜色色块显示绿色圆点角标 + 绿色边框（绿色复用写入成功的语义色）
 
 ## 关键全局变量
 

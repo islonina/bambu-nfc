@@ -12,7 +12,8 @@ A PWA tool for reading and writing MIFARE Classic 1K NFC tags on Bambu Lab 3D pr
 
 - 📖 **Read** — Scan NFC tags, parse filament info (type, color, temperature, diameter, etc.), and match against the tag library
 - ✏️ **Write** — Select filament from the library and write to blank NFC tags, with random dump shuffling
-- ✅ **Written Tracking** — Colors are auto-marked after a successful write, and can be toggled manually from the Scan or Write pages, so you never waste a card on a repeat write
+- 🎨 **Colors Overview** — Browse all categories/materials/colors without Bluetooth; tap a swatch to mark it as written and see at a glance what's left
+- ✅ **Written Tracking** — Colors are auto-marked after a successful write, and can be toggled manually from the Colors, Scan, or Write pages, so you never waste a card on a repeat write
 - 📱 **PWA** — Install as desktop app, works offline
 - 🔒 **Key Derivation** — Automatically derive read/write keys from UID via HKDF-SHA256
 

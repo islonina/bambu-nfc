@@ -15,8 +15,15 @@ const en: Record<string, string> = {
   'conn.last_disconnect': 'Last disconnect: ',
 
   // tabs
+  'tab.colors': 'Colors',
   'tab.scan': 'Scan',
   'tab.write': 'Write',
+
+  // colors page (overview, no bluetooth required)
+  'colors.title': 'All Colors',
+  'colors.hint': 'Tap a color to mark / unmark it as written — successful writes are marked automatically',
+  'colors.written_label': 'written',
+  'colors.written_count': '{0}/{1} written',
 
   // scan page
   'scan.empty_text': 'Place a Bambu NFC tag on the reader<br>and tap the button below',

@@ -228,5 +228,5 @@ Tactile and confident: clear borders, strong affordance, satisfying click target
 - **Don't** use `outline: none` without a `:focus-visible` replacement. Keyboard users must see where they are.
 - **Don't** animate layout properties (width, height, top, left). Use `transform` and `opacity` only.
 - **Don't** add onboarding wizards, progress milestones, celebration confetti, or gamification patterns. Per PRODUCT.md: "Not a consumer-friendly onboarding wizard with progress milestones and celebration confetti."
-- **Don't** use SaaS dashboard patterns (sidebar navigation, charts, empty card grids, data tables). This is a two-tab utility, not a platform.
+- **Don't** use SaaS dashboard patterns (sidebar navigation, charts, empty card grids, data tables). This is a three-tab utility, not a platform.
 - **Don't** tint neutral surfaces toward warm or cool "for atmosphere." The neutral palette is the hardware aesthetic; warmth is carried by content (filament colors), not by the interface chrome.

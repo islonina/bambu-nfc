@@ -17,12 +17,19 @@ function load(): string[] {
 }
 
 /** \u001f 作分隔符，避免颜色/材料名中可能出现的一般字符造成键冲突 */
+export const WRITTEN_KEY_SEPARATOR = '\u001f'
+
 function keyOf(category: string, material: string, color: string): string {
-  return `${category}\u001f${material}\u001f${color}`
+  return `${category}${WRITTEN_KEY_SEPARATOR}${material}${WRITTEN_KEY_SEPARATOR}${color}`
 }
 
 class WrittenStore {
   #keys = $state<string[]>(load())
+
+  /** 全部已标记的颜色键（category<sep>material<sep>color），只读用途 */
+  get keys(): string[] {
+    return this.#keys
+  }
 
   isWritten(category: string, material: string, color: string): boolean {
     return this.#keys.includes(keyOf(category, material, color))
