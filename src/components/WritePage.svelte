@@ -157,24 +157,28 @@
         {#each sortedColors as c (c.name)}
           <button
             type="button"
-            class="group relative w-10 h-10 rounded-lg cursor-pointer transition-all border-2 hover:z-10 {c.name === writeStore.selectedColorKey ? 'z-10 border-accent scale-110 ring-2 ring-accent/30' : 'border-border hover:border-dim'}"
-            style={c.secondaryColorCSS
-              ? `background:linear-gradient(135deg, ${c.colorCSS} 50%, ${c.secondaryColorCSS} 50%)`
-              : `background:${c.colorCSS}`}
+            aria-pressed={c.name === writeStore.selectedColorKey}
+            class="group flex w-16 shrink-0 flex-col items-center gap-1 cursor-pointer bg-transparent border-none p-0"
             aria-label={swatchLabel(c.name, c.nameZh)}
             title={swatchLabel(c.name, c.nameZh)}
             onclick={() => writeStore.selectColor(c.name)}
           >
-            {#if writtenStore.isWritten(writeStore.selectedCategory, writeStore.selectedMaterial, c.name)}
-              <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green border-2 border-bg z-20" aria-hidden="true"></span>
-            {/if}
-            {#if c.name === writeStore.selectedColorKey}
-              <div class="w-full h-full flex items-center justify-center">
-                <Check size={18} class="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" stroke="white" stroke-width={3} />
-              </div>
-            {/if}
-            <!-- Name tooltip on hover -->
-            <span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[0.55rem] text-text whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 bg-card px-1.5 py-0.5 rounded">{colorLabel(c.name, c.nameZh)}</span>
+            <span
+              class="relative block h-10 w-10 rounded-lg border-2 transition-all {c.name === writeStore.selectedColorKey ? 'border-accent ring-2 ring-accent/30' : 'border-border group-hover:border-dim'}"
+              style={c.secondaryColorCSS
+                ? `background:linear-gradient(135deg, ${c.colorCSS} 50%, ${c.secondaryColorCSS} 50%)`
+                : `background:${c.colorCSS}`}
+            >
+              {#if writtenStore.isWritten(writeStore.selectedCategory, writeStore.selectedMaterial, c.name)}
+                <span class="absolute -top-1 -right-1 z-10 h-2.5 w-2.5 rounded-full border-2 border-bg bg-green" aria-hidden="true"></span>
+              {/if}
+              {#if c.name === writeStore.selectedColorKey}
+                <span class="absolute inset-0 flex items-center justify-center">
+                  <Check size={18} class="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" stroke="white" stroke-width={3} />
+                </span>
+              {/if}
+            </span>
+            <span class="w-full text-center text-[0.55rem] leading-[1.2] line-clamp-2 break-words {c.name === writeStore.selectedColorKey ? 'text-text' : 'text-dim'}">{colorLabel(c.name, c.nameZh)}</span>
           </button>
         {/each}
       </div>
