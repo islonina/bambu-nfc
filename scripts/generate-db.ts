@@ -125,8 +125,22 @@ const FILAMENT_TYPE_TO_CATEGORY: Record<string, string> = {
  * "PETG HF") so we can usually classify without touching the directory.
  */
 const DETAILED_TYPE_TO_CATEGORY: Record<string, string> = {}
+/** Lowercased block-4 string → canonical registered spelling. */
+const DETAILED_TYPE_CANONICAL = new Map<string, string>()
 function registerDetailedType(detailed: string, category: string): void {
   DETAILED_TYPE_TO_CATEGORY[detailed] = category
+  DETAILED_TYPE_CANONICAL.set(detailed.toLowerCase(), detailed)
+}
+
+/**
+ * Tags occasionally carry a casing variant of a known material (observed:
+ * "Support For PLA" on one tag vs "Support for PLA" on the other 57), and
+ * keying materials by the raw block-4 string would split them into duplicate
+ * groups. Fold anything that differs only by case onto the registered
+ * spelling; unknown strings pass through untouched.
+ */
+function canonicalizeDetailedType(raw: string): string {
+  return DETAILED_TYPE_CANONICAL.get(raw.toLowerCase()) ?? raw
 }
 // The detailed-filament-type namespace is shared with the official colour DB
 // (its `fila_type` field), so enumerating the known materials keeps the two
@@ -212,6 +226,7 @@ const MULTI_COLOR_TYPES = new Set(['渐变色', '多拼色'])
  */
 function lookupColorName(
   tag: ParsedTag,
+  detailedType: string,
   db: ColorDBEntry[],
 ): { name: string; nameZh: string | null; exact: boolean } | null {
   const sig = tagColorSignature(tag)
@@ -225,7 +240,7 @@ function lookupColorName(
     if (entrySig.length !== sig.length) continue
     if (entrySig.some((c, i) => c !== sig[i])) continue
     // Colour signature matches.
-    if (entry.fila_type === tag.detailedFilamentType && entry.fila_color_name.en) {
+    if (entry.fila_type === detailedType && entry.fila_color_name.en) {
       return { name: entry.fila_color_name.en, nameZh: entry.fila_color_name.zh ?? null, exact: true }
     }
     if (!hexOnly && entry.fila_color_name.en) {
@@ -292,17 +307,18 @@ function main(): void {
       if (!tag) { skipped++; continue }
 
       const pathInfo = parsePathSegments(filePath)
+      const detailedType = canonicalizeDetailedType(tag.detailedFilamentType)
 
       // Resolve category: detailed type → short type → directory.
       let category =
-        DETAILED_TYPE_TO_CATEGORY[tag.detailedFilamentType] ??
+        DETAILED_TYPE_TO_CATEGORY[detailedType] ??
         FILAMENT_TYPE_TO_CATEGORY[tag.filamentType] ??
         pathInfo?.category ??
         null
       // Resolve material: detailed type → directory.
-      let material = tag.detailedFilamentType || pathInfo?.material || null
+      let material = detailedType || pathInfo?.material || null
       // Resolve colour: official DB → directory.
-      const official = lookupColorName(tag, colorDB)
+      const official = lookupColorName(tag, detailedType, colorDB)
       let color = official?.name ?? pathInfo?.color ?? null
 
       if (!category || !material || !color) { skipped++; continue }
