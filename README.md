@@ -2,7 +2,7 @@
 
 A PWA tool for reading and writing MIFARE Classic 1K NFC tags on Bambu Lab 3D printer filament spools via Bluetooth-connected [Chameleon Ultra](https://github.com/RfidResearchGroup/ChameleonUltra) device.
 
-**🔗 Online: [kuaner.github.io/bambu-nfc](https://kuaner.github.io/bambu-nfc/)**
+**🔗 Online: [kuaner.github.io/bambu-nfc](https://islonina.github.io/bambu-nfc/)**
 
 > ⚠️ **Browser Compatibility:** This tool requires the **Web Bluetooth API**, which is only supported on **Chrome / Edge desktop** (Windows, macOS, Linux). Safari, Firefox, and all mobile browsers are **not supported**.
 >
