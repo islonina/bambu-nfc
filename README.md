@@ -74,7 +74,7 @@ This project depends on the following open-source projects and research:
 - [chameleon-ultra.js](https://github.com/taichunmin/chameleon-ultra.js) — JavaScript SDK for Chameleon Ultra device, providing Bluetooth communication and NFC operations
 - [Bambu-Lab-RFID-Library](https://github.com/queengooborg/Bambu-Lab-RFID-Library) — Bambu Lab RFID tag dump library, the source of tag data for this project
 - [RFID-Tag-Guide](https://github.com/queengooborg/Bambu-Lab-RFID-Library) — Bambu Lab NFC tag format analysis and key derivation documentation
-- [Bambu NFC](https://github.com/kuaner/bambu-nfc) - Bambu NFC using Chameleon Ultra the easy way
+- [Bambu NFC](https://github.com/kuaner/bambu-nfc) - Original Bambu NFC using Chameleon Ultra the easy way
 
 ## Disclaimer
 
